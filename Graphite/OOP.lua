@@ -27,15 +27,20 @@ local Dictionary = Graphite.Dictionary
 local OOP = {}
 
 local config = Graphite.Config.OOP
-local missing_err = "Missing %q in Graphite.Config.OOP!"
 
 -- Method names
-local name_initializer = assert(config["InitializerName"], missing_err:format("InitializerName"))
-local name_constructor = assert(config["ConstructorName"], missing_err:format("ConstructorName"))
-local name_placement_constructor = assert(config["PlacementConstructorName"], missing_err:format("PlacementConstructorName"))
-local name_destructor = assert(config["DestructorName"], missing_err:format("DestructorName"))
-local name_copy = assert(config["CopyName"], missing_err:format("CopyName"))
-local name_type_checker = assert(config["TypeCheckerName"], missing_err:format("TypeCheckerName"))
+local name_initializer = config:_require("InitializerName")
+local name_constructor = config:_require("ConstructorName")
+local name_placement_constructor = config:_require("PlacementConstructorName")
+local name_destructor = config:_require("DestructorName")
+local name_copy = config:_require("CopyName")
+local name_type_checker = config:_require("TypeCheckerName")
+
+-- Attributes in the configuration
+local default_attributes = config:_require("DefaultAttributes")
+local default_static_attributes = config:_require("DefaultStaticAttributes")
+
+config:_lock()
 
 -- Utility methods
 local function handle_indirection(class, instance)
@@ -142,12 +147,8 @@ function OOP.BaseClass:Members(members)
 	return self
 end
 
-OOP.Object = {
-	members = {},
-	metatable = {},
-	attributes = {},
-	typecheck = {}
-}
+OOP.Object = Dictionary.DeepCopy(OOP.BaseClass)
+	--:Attributes(default_attributes)
 
 OOP.Object.members.class = newproxy(true)
 getmetatable(OOP.Object.members.class).__index = OOP.Object
@@ -227,12 +228,8 @@ OOP.Object.members[name_copy] = function(self)
 	return copy
 end
 
-OOP.StaticObject = {
-	members = {},
-	metatable = {},
-	attributes = {},
-	typecheck = {}
-}
+OOP.StaticObject = Dictionary.DeepCopy(OOP.BaseClass)
+	--:Attributes(default_static_attributes)
 
 OOP.StaticObject.members.class = newproxy(true)
 getmetatable(OOP.StaticObject.members.class).__index = OOP.StaticObject

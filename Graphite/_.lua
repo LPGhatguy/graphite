@@ -24,17 +24,29 @@
 	3. This notice may not be removed or altered from any source distribution.
 ]]
 
+local libGraphite = (...)
+local Config = libGraphite.Config
+
 local Graphite = {
 	Version = {0, 1, 0, "alpha"},
 
 	Config = {
-		OOP = {
+		OOP = Config:Create("Graphite.Config.OOP") {
 			InitializerName = "_init",
 			ConstructorName = "New",
 			PlacementConstructorName = "PlacementNew",
 			DestructorName = "Destroy",
 			CopyName = "Copy",
-			TypeCheckerName = "Is"
+			TypeCheckerName = "Is",
+
+			DefaultAttributes = {
+			},
+
+			DefaultStaticAttributes = {
+			}
+		},
+		Pointers = Config:Create("Graphite.Config.Pointer") {
+			SetName = "Set"
 		}
 	}
 }
