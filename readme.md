@@ -20,7 +20,7 @@ print("Using Graphite Version " .. Graphite.VersionString)
 -- Adds a "Name" that's the string reversal of the attribute
 -- Completely pointless
 OOP:RegisterAttribute("Class", "Name", function(class)
-	class.members.Name = class.attributes.Name:reverse()
+	class.__members.Name = class.__attributes.Name:reverse()
 end)
 
 local A
