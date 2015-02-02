@@ -1,9 +1,8 @@
 --[[
 	Graphite for Lua
-	Forward Pointer
+	Lookup Pointer
 
-	Wraps primitives and forwards operators.
-	Use Graphite.Number for comparisons to ensure compatibility.
+	Wraps
 
 	Copyright (c) 2014 Lucien Greathouse (LPGhatguy)
 
@@ -37,73 +36,91 @@ local indexable = {
 	["string"] = true
 }
 
+local function nav(parent, path)
+	for i = 1, #path do
+		if (not indexable[type(parent)]) then
+			return nil
+		end
+
+		parent = parent[path[i]]
+	end
+
+	return parent
+end
+
+local function getvalue(self)
+	return nav(self.__parent, self.__path)
+end
+
 local meta = {
 	__add = function(a, b)
-		return (tonumber(a) or a.__value) + (tonumber(b) or b.__value)
+		return (tonumber(a) or getvalue(a)) + (tonumber(b) or getvalue(b))
 	end,
 	__sub = function(a, b)
-		return (tonumber(a) or a.__value) - (tonumber(b) or b.__value)
+		return (tonumber(a) or getvalue(a)) - (tonumber(b) or getvalue(b))
 	end,
 	__div = function(a, b)
-		return (tonumber(a) or a.__value) / (tonumber(b) or b.__value)
+		return (tonumber(a) or getvalue(a)) / (tonumber(b) or getvalue(b))
 	end,
 	__mul = function(a, b)
-		return (tonumber(a) or a.__value) * (tonumber(b) or b.__value)
+		return (tonumber(a) or getvalue(a)) * (tonumber(b) or getvalue(b))
 	end,
 	__mod = function(a, b)
-		return (tonumber(a) or a.__value) % (tonumber(b) or b.__value)
+		return (tonumber(a) or getvalue(a)) % (tonumber(b) or getvalue(b))
 	end,
 	__pow = function(a, b)
-		return (tonumber(a) or a.__value) ^ (tonumber(b) or b.__value)
+		return (tonumber(a) or getvalue(a)) ^ (tonumber(b) or getvalue(b))
 	end,
 	__concat = function(a, b)
 		return tostring(a) .. tostring(b)
 	end,
 	__eq = function(a, b)
-		return (indexable[type(a)] and a.__value or a) == (indexable[type(b)] and b.__value or b)
+		return (indexable[type(a)] and getvalue(a) or a) == (indexable[type(b)] and getvalue(b) or b)
 	end,
 	__lt = function(a, b)
-		return (indexable[type(a)] and a.__value or a) < (indexable[type(b)] and b.__value or b)
+		return (indexable[type(a)] and getvalue(a) or a) < (indexable[type(b)] and getvalue(b) or b)
 	end,
 	__le = function(a, b)
-		return (indexable[type(a)] and a.__value or a) <= (indexable[type(b)] and b.__value or b)
+		return (indexable[type(a)] and getvalue(a) or a) <= (indexable[type(b)] and getvalue(b) or b)
 	end,
 	__unm = function(self)
-		return -self.__value
+		return -getvalue(self)
 	end,
 	__tostring = function(self)
-		return tostring(self.__value)
+		return tostring(getvalue(self))
 	end,
 	__index = function(self, key)
-		return self.__value[key]
+		return getvalue(self)[key]
 	end,
 	__newindex = function(self, key, value)
-		self.__value[key] = value
+		getvalue(self)[key] = value
 	end,
 	__call = function(self, ...)
-		return self.__value(...)
+		return getvalue(self)(...)
 	end,
 	__pairs = function(self)
-		return pairs(self.__value)
+		return pairs(getvalue(self))
 	end,
 	__ipairs = function(self)
-		return ipairs(self.__value)
+		return ipairs(getvalue(self))
 	end
 }
 
-local ForwardPointer = {}
+local LookupPointer = {}
 
-ForwardPointer[constructor_name] = function(self, value)
+LookupPointer[constructor_name] = function(self, parent, path)
 	local instance = Dictionary.DeepCopy(self)
-	instance.__value = value
+	instance.__parent = parent
+	instance.__path = path
 
 	setmetatable(instance, meta)
 
 	return instance
 end
 
-ForwardPointer[set_name] = function(self, value)
-	self.__value = value
+LookupPointer[set_name] = function(self, parent, path)
+	self.__parent = parent
+	self.__path = path
 end
 
-return ForwardPointer
+return LookupPointer
