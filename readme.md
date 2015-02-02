@@ -3,14 +3,17 @@ Graphite is a set of core functionality extensions to Lua in a small package usi
 
 Graphite provides utility methods intended to be used as a Graphene submodule of a larger Graphene-based project, like Coeus. Simply add Graphite to your library directory, provide a submodule directive in your module, and remove `./Graphite/init.lua`. Graphite will then use the top-level Graphene loader.
 
-It presently exposes utilities for working on `Dictionary`, and `List` objects, alongside classes through a powerful OOP library.
+It presently exposes a number of utilities, including `Dictionary` and `List` operations, various pointer types (`ForwardPointer`, `LookupPointer`, `WeakPointer`) and an expressive `OOP` implementation.
 
-The OOP syntax is very expressive, with features present in lots of other frameworks and languages like custom attributes, multiple inheritance and ancestor typechecking:
+The OOP syntax is very powerful, with features present in lots of other frameworks and languages like custom attributes, multiple inheritance and ancestor typechecking.
+
+See the `examples` directory for more detailed examples.
 
 ```lua
 local Graphite = require("Graphite")
 local OOP = Graphite.OOP
 
+-- Report our Graphite version
 print("Using Graphite Version " .. Graphite.VersionString)
 
 -- Sample class attribute
@@ -29,6 +32,10 @@ A = OOP:Class()
 
 		__tostring = function(self)
 			return tostring(self.Value)
+		end,
+
+		__gc = function(self)
+			return self:Destroy()
 		end
 	}
 	:Attributes {
