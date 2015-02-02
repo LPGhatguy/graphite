@@ -14,46 +14,101 @@ end
 	The current included attributes are:
 	- SparseInstances: Save data by not storing class data in instances unless it changes.
 	- InstanceIndirection: Wraps class instances in a userdata access layer. Allows for the __gc metamethod on Lua 5.1 and LuaJIT.
+	- InstancedMetatable: Whether a new metatable should be given to each object or whether the same one should be kept class-wide.
+	- PooledInstantiation: Whether instances should come from a pool filled with collected objects.
+		- PoolSize: The maximum size of the instance pool, defaults to 20
 ]]
 
 local Graphite = require("Graphite")
 
--- Create a class representing something with a Name
--- Also give it a __tostring
-local Named = Graphite.OOP:Class()
+-- Sparse instanced class
+local Sparse = Graphite.OOP:Class()
+	:Attributes {
+		SparseInstances = true
+	}
 	:Members {
-		Name = "Unknown"
+		Hello = {}
+	}
+
+-- Instance two of these classes and check their member "Hello"
+local a = Sparse:New()
+local b = Sparse:New()
+
+-- This is true: welcome to sparse instances
+print("a.Hello == b.Hello?", a.Hello == b.Hello)
+
+
+-- Instance indirection class
+-- You don't need this if you're on Lua 5.2+, since this is primarily for __gc.
+local Indirected = Graphite.OOP:Class()
+	:Attributes {
+		InstanceIndirection = true
 	}
 	:Metatable {
-		__tostring = function(self)
-			return self.Name
+		__gc = function(self)
+			print("Indirected instance collected!")
 		end
 	}
 
--- Give it a constructor with an optional 'name' argument
-function Named:_init(name)
-	self.Name = name or "Unknown"
+-- We create a scope to force more consistent garbage collection
+do
+	local instance = Indirected:New()
 end
 
--- Usage
+-- instance goes out of scope and can be collected, so we force it
+collectgarbage()
+-- We then receive a printed message saying that the instance was indeed collected.
 
--- Create Bob and Jan
-local Bob = Named:New("Bob")
-local Jan = Named:New("Jan")
 
--- These give results as expected
-print("Bob's name is " .. Bob.Name)
-print("Jan's name is " .. Jan.Name)
+-- InstancedMetatable attribute class
+-- Normally, every instance of a class shares a common metatable.
+-- InstancedMetatable lets you change that
+local FreshMeta = Graphite.OOP:Class()
+	:Attributes {
+		InstancedMetatable = true
+	}
 
--- We can change values with no problem
-Bob.Name = "Bobby"
+-- Create a pair of instances
+local a = FreshMeta:New()
+local b = FreshMeta:New()
 
--- Bob has legally changed his name to Bobby!
-print("Bob's new name is " .. Bob.Name)
+-- Set a value in the first class
+getmetatable(a).have = "meat"
 
--- Let's create a clone of Jan and name her Janice
-local Janice = Jan:Copy()
-Janice.Name = "Janice"
+-- This is nil, thanks to InstancedMetatable.
+-- Without InstancedMetatable, this would be "meat"
+print("b has this value for metatable.have:", getmetatable(b).have)
 
--- Our clone lives and has her own identity!
-print("Janice's name is " .. Janice.Name)
+
+-- Pooled instantiation
+-- Use the PooledInstantiation attribute to save on allocations. This can help remediate GC slowdowns.
+-- Objects must be explicitly destroyed to be added to the pool unless in Lua 5.2+ or using InstancedIndirection.
+-- This might be good for objects with potentially short lifetimes, like math objects.
+-- Use the PoolSize attribute to tweak the maximum size of the instance pool. Make this a power of 2 for optimal results.
+local Pooled = Graphite.OOP:Class()
+	:Attributes {
+		PooledInstantiation = true,
+		PoolSize = 4,
+		InstanceIndirection = true
+	}
+
+do
+	-- Fill up the instance pool and some.
+	for i = 1, 10 do
+		-- We add an attribute that will stick with the instance.
+		-- This way, we'll know whether a new instance is from the pool or not.
+		local p = Pooled:New()
+		p.WAS_POOLED = true
+	end
+
+	-- No instances have been destroyed up to this point, hopefully.
+	-- Destroy all of them by collecting garbage.
+	collectgarbage()
+
+	-- Create instances
+	-- The first 4 should report that they were pooled, while the 5th will report that it was not pooled.
+	for i = 1, 5 do
+		local p = Pooled:New()
+		print("Instance " .. i .. " was pooled?", p.WAS_POOLED)
+	end
+end
