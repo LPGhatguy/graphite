@@ -46,7 +46,8 @@ local Graphite = {
 			}
 		},
 		Pointers = Configuration:Create("Graphite.Config.Pointer") {
-			SetName = "Set"
+			SetName = "Set",
+			AvailableCheckName = "Available"
 		}
 	}
 }
