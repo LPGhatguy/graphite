@@ -262,8 +262,12 @@ function OOP:StaticClass()
 
 	class.typecheck[class] = true
 
+	class.class = newproxy(true)
+	getmetatable(class.class).__index = class
+
 	setmetatable(class, {
-		__newindex = class.members
+		__newindex = class.members,
+		__index = class.members
 	})
 
 	return class
