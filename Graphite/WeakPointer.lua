@@ -79,7 +79,7 @@ local meta = {
 	__index = function(self, key)
 		local real = rawget(self, "__value")
 
-		if (not real) then
+		if (real == nil) then
 			error("Object has been collected!", 2)
 		end
 

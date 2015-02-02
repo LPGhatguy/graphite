@@ -49,7 +49,14 @@ local function nav(parent, path)
 end
 
 local function getvalue(self)
-	return nav(self.__parent, self.__path)
+	local parent = rawget(self, "__parent")
+	local path = rawget(self, "__path")
+
+	if (parent and path) then
+		return nav(parent, path)
+	else
+		return self
+	end
 end
 
 local meta = {

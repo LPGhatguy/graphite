@@ -75,7 +75,13 @@ local meta = {
 		return tostring(self.__value)
 	end,
 	__index = function(self, key)
-		return self.__value[key]
+		local real = rawget(self, "__value")
+
+		if (real == nil) then
+			error("Object does not exist!", 2)
+		end
+
+		return real[key]
 	end,
 	__newindex = function(self, key, value)
 		self.__value[key] = value
