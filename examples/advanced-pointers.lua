@@ -8,7 +8,8 @@ end
 --[[
 	Graphite: Pointers
 
-	Graphite includes a few types of pointer for various purposes:
+	Graphite includes a few types of pointers for various purposes.
+	They let you pass any object by reference.
 
 	ForwardPointer: Provides a full layer of indirection over an object.
 		Allows operators to execute on Lua 5.1 between mismatched types.
@@ -41,6 +42,12 @@ print("5 > 3?", Number.GreaterThan(ptr_five, 3))
 -- They have another, less verbose form, following Lua metamethod conventions:
 print("5 < 10?", Number.lt(ptr_five, 10))
 print("5 >= 5?", Number.le(ptr_five, 5))
+
+-- We can change the value of the pointer, as well, which is useful for primitives:
+ptr_five:Set("five")
+
+-- Now "five" instead of the number 5
+print(ptr_five)
 
 -- We can also wrap classes!
 -- Let's create a simple Vector2 class:
