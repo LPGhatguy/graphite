@@ -248,7 +248,8 @@ function OOP:Class()
 	getmetatable(class.class).__index = class
 
 	setmetatable(class, {
-		__newindex = class.members
+		__newindex = class.members,
+		__index = class.members
 	})
 
 	return class
