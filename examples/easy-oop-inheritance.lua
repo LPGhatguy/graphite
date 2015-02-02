@@ -56,7 +56,7 @@ mittens:Speak() --> "The animal speaks!"
 
 mittens:Pet() --> "The furry animal is pet."
 
-mittens:Purr() --> "The car purrs."
+mittens:Purr() --> "The cat purrs."
 
 -- We can do formal type checking on these if we need to:
 
