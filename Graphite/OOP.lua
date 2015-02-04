@@ -352,9 +352,7 @@ OOP.StaticObject[name_type_checker] = OOP.StaticObject.__typecheck
 	Creates a new, empty class.
 ]]
 function OOP:Class()
-	local class = Dictionary.DeepCopy(self.BaseClass)
-
-	Dictionary.DeepCopy(self.Object, class)
+	local class = Dictionary.DeepCopy(self.Object)
 
 	class.__typecheck[class] = true
 
@@ -372,9 +370,7 @@ end
 	Creates a static (singleton) class.
 ]]
 function OOP:StaticClass()
-	local class = Dictionary.ShallowCopy(self.BaseClass)
-
-	Dictionary.DeepCopy(self.StaticObject, class)
+	local class = Dictionary.DeepCopy(self.StaticObject)
 
 	class.__typecheck[class] = true
 
