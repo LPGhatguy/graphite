@@ -38,9 +38,9 @@ function List.Clear(list)
 end
 
 --[[
-	table List.ShallowCopy(table from, [table to])
-		from: The table to source data from
-		to: The table to copy into; an empty table if not given.
+	table List.ShallowCopy(List from, [List to])
+		from: The list to source data from
+		to: The list to copy into; an empty table if not given.
 
 	Shallow copies data from one table into another and returns the result.
 ]]

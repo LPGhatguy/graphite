@@ -25,7 +25,7 @@ end
 local Graphite = require("Graphite")
 
 -- We use this for numeric comparisons; this is a shortcoming of ForwardPointers on Lua 5.1 and LuaJIT.
-local Number = Graphite.Number
+local Operators = Graphite.Operators
 
 print("\nForwardPointer example")
 -- Wrap a primitive
@@ -36,12 +36,12 @@ print(ptr_five) --> 5
 print(ptr_five + 5) --> 10
 
 -- Comparisons require a utility method, sadly.
-print("5 = 5?", Number.Equals(ptr_five, 5))
-print("5 > 3?", Number.GreaterThan(ptr_five, 3))
+print("5 = 5?", Operators.Equals(ptr_five, 5))
+print("5 > 3?", Operators.GreaterThan(ptr_five, 3))
 
 -- They have another, less verbose form, following Lua metamethod conventions:
-print("5 < 10?", Number.lt(ptr_five, 10))
-print("5 >= 5?", Number.le(ptr_five, 5))
+print("5 < 10?", Operators.lt(ptr_five, 10))
+print("5 >= 5?", Operators.le(ptr_five, 5))
 
 -- We can change the value of the pointer, as well, which is useful for primitives:
 ptr_five:Set("five")
